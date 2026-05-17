@@ -24,9 +24,8 @@ public class PlayerInput : MonoBehaviour
 
     public void OnLaunch(InputAction.CallbackContext ctx)
     {
-        if (ctx.ReadValueAsButton()
-            && attachedBall != null 
-            && attachedBall.CurState() == BallControl.BallState.Attached)
+        if (ctx.ReadValueAsButton() && attachedBall != null 
+                                    && attachedBall.CurState() == BallControl.BallState.Attached)
         {
             attachedBall.Launch();
             attachedBall = null;

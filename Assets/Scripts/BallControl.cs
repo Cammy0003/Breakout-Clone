@@ -16,9 +16,9 @@ public class BallControl : MonoBehaviour
     private float _ballAngle;
     [SerializeField] private float maxAngle;
     
-    
-
+    [Header("External Parameters")]
     private BallState _currentState;
+    
     
     private void Start()
     {
@@ -56,32 +56,47 @@ public class BallControl : MonoBehaviour
         {
             HandleBarrierBounce(collision);
         }
+        else if (collision.gameObject.CompareTag("Player"))
+        {
+            HandlePlayerBounce(collision);
+        }
     }
 
     private void HandleBarrierBounce(Collision collision)
     {
-        GameObject hitObject = collision.gameObject;
-        Wall wall = hitObject.GetComponent<Wall>();
-        WallOrientation orientation = wall.Orientation;
-        
-        Vector3 v = _rb.linearVelocity;
+        Vector3 normal = collision.contacts[0].normal;
+        Vector3 incomingVel = -collision.relativeVelocity;
+        Vector3 reflectedVel = Vector3.Reflect(incomingVel, normal);
 
+        float minTan = Mathf.Tan(15f * Mathf.Deg2Rad);
 
-        if (orientation == WallOrientation.Top)
+        if (Math.Abs(reflectedVel.y) < Mathf.Abs(reflectedVel.x) * minTan)
         {
-            v.y = -v.y;
+            float signY = reflectedVel.y >= 0 ? 1f : -1f;
+            if (Mathf.Approximately(reflectedVel.y, 0f))
+            {
+                signY = UnityEngine.Random.value > 0.5f ? 1f : -1f;
+            }
+
+            reflectedVel.y = Mathf.Abs(reflectedVel.x) * minTan * signY;
         }
-        else
-        {
-            v.x = -v.x;
-        }
+
+        _rb.linearVelocity = reflectedVel.normalized * ballSpeed;
+    }
+
+    private void HandlePlayerBounce(Collision collision)
+    {
+        float paddleCenter = collision.transform.position.x;
+        float paddleWidth = collision.collider.bounds.size.x;
+        float paddleImpactPoint = collision.contacts[0].point.x;
+        float paddleRelative = (paddleImpactPoint - paddleCenter) / (paddleWidth / 2);
+        paddleRelative = Mathf.Clamp(paddleRelative, -1f, 1f);
         
-
-        _rb.linearVelocity = v.normalized * ballSpeed;
-
-        // Vector3 v = _rb.linearVelocity;
-        // v.y += UnityEngine.Random.Range(-1f, 1f);
-        // _rb.linearVelocity = v.normalized * ballSpeed;
+        float maxTheta = 70f * Mathf.Deg2Rad;
+        float theta = paddleRelative * maxTheta;
+        Vector3 reflectedVel = new Vector3(Mathf.Sin(theta), Mathf.Cos(theta), 0f);
+        
+        _rb.linearVelocity = reflectedVel.normalized * ballSpeed;
     }
 
     private void SetState(BallState newState)

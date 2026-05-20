@@ -5,10 +5,9 @@ public class PlayerInput : MonoBehaviour
 {
 
     [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private BallControl attachedBall;
+    [SerializeField] private GameManager gameManager;
     
     private Rigidbody _rb;
-    private Collider _col;
     private Vector2 _moveInput;
 
     [Header("Wall Collision Parameters")] 
@@ -21,7 +20,6 @@ public class PlayerInput : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        // _col = GetComponent<Collider>();
     }
 
     private void Start()
@@ -40,11 +38,9 @@ public class PlayerInput : MonoBehaviour
 
     private void OnLaunch(InputAction.CallbackContext ctx)
     {
-        if (ctx.ReadValueAsButton() && attachedBall != null 
-                                    && attachedBall.CurState() == BallControl.BallState.Attached)
+        if (ctx.ReadValueAsButton())
         {
-            attachedBall.Launch();
-            attachedBall = null;
+            gameManager.LaunchBall();
         }
     }
 

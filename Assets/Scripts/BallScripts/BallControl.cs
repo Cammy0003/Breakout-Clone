@@ -1,54 +1,30 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BallControl : MonoBehaviour
 {
-    public enum BallState { Attached, Projectile }
-    
-    [Header("Tracking Settings")]
-    private float _ballOffset;
-    public GameObject player;
-    
     [Header("Physics Settings")]
     private Rigidbody _rb;
     [SerializeField] private float ballSpeed = 20f;
     private float _ballAngle;
     [SerializeField] private float maxAngle;
     
-    [Header("External Parameters")]
-    private BallState _currentState;
-    
     
     private void Start()
     {
         _rb = GetComponent<Rigidbody>();
-        _ballOffset = 0.7f;
-        SetState(BallState.Attached);
+        _rb.isKinematic = false;
+        Launch();
     }
 
     private void FixedUpdate()
     {
-        if (_currentState == BallState.Projectile 
-            && !Mathf.Approximately(_rb.linearVelocity.sqrMagnitude, ballSpeed*ballSpeed))
+        if (!Mathf.Approximately(_rb.linearVelocity.sqrMagnitude, ballSpeed*ballSpeed))
         {
             _rb.linearVelocity = _rb.linearVelocity.normalized * ballSpeed;
         }
     }
     
-    private void LateUpdate()
-    {
-        if (_currentState == BallState.Attached)
-        {
-            AttachedTracking();
-        }
-    }
-
-    private void AttachedTracking()
-    {
-        Vector3 playerPos = player.transform.position;
-        transform.position = new Vector3(playerPos.x, playerPos.y + _ballOffset, playerPos.z);
-    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -98,35 +74,15 @@ public class BallControl : MonoBehaviour
         
         _rb.linearVelocity = reflectedVel.normalized * ballSpeed;
     }
+    
 
-    private void SetState(BallState newState)
+    private void Launch()
     {
-        switch (newState)
-        {
-            case BallState.Attached:
-                _rb.isKinematic = true;
-                break;
-            
-            case BallState.Projectile:
-                _rb.isKinematic = false;
-                break;
-        }
-
-        _currentState = newState;
-    }
-
-    public void Launch()
-    {
-        SetState(BallState.Projectile);
         float xDir = UnityEngine.Random.Range(-1f, 1f);
         float yDir = UnityEngine.Random.Range(0f, 1f);
 
         _rb.linearVelocity = new Vector3(xDir, yDir, 0).normalized * ballSpeed;
-
     }
 
-    public BallState CurState()
-    {
-        return _currentState;
-    }
+
 }

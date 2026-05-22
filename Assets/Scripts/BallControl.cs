@@ -75,7 +75,6 @@ public class BallControl : MonoBehaviour
         _rb.linearVelocity = reflectedVel.normalized * ballSpeed;
     }
     
-
     private void Launch()
     {
         float xDir = UnityEngine.Random.Range(-1f, 1f);

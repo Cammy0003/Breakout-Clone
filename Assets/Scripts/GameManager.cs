@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -8,16 +9,21 @@ public class GameManager : MonoBehaviour
 
 
     private GameObject _currBall;
-    private bool _isLaunched = false;
+    private bool _isLaunched;
     private const float BallOffset = 0.7f;
-    private float _lowerBound = -10f;
+    private const float LowerBound = -10f;
+
+    private void Start()
+    {
+        _isLaunched = false;
+    }
 
     private void Update()
     {
         if (!_isLaunched) return;
 
         float ballYPos = _currBall.transform.position.y;
-        if (ballYPos < _lowerBound)
+        if (ballYPos < LowerBound)
         {
             DestroyBall();
         }
